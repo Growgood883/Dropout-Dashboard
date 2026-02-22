@@ -38,6 +38,16 @@ risk_counts = df["Risk_Category"].value_counts()
 st.bar_chart(risk_counts)
 
 # High Risk Students Table
-st.subheader("🚨 High Risk Students")
+st.subheader("🚨 High Risk Students Details")
 
-st.dataframe(df[df["Alert_Flag"]=="YES"])
+high_risk = df[df["Alert_Flag"]=="YES"]
+
+st.dataframe(high_risk[
+['Student_ID',
+ 'School_ID',
+ 'Area_Type',
+ 'Gender',
+ 'Caste_Category',
+ 'Standard',
+ 'Risk_Score']
+])

@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+
+# Page Title
+st.title("🎓 Student Dropout Early Warning System")
 
 # Load Dataset
 df = pd.read_csv("student_risk_output.csv")
-
-st.title("🎓 Student Dropout Early Warning System")
 
 # Sidebar Filter
 st.sidebar.header("Filter Students")
@@ -15,6 +15,7 @@ risk_filter = st.sidebar.selectbox(
     ["All","Low","Medium","High"]
 )
 
+# Apply Filter
 if risk_filter!="All":
     df = df[df["Risk_Category"]==risk_filter]
 
@@ -34,9 +35,7 @@ st.subheader("Risk Distribution")
 
 risk_counts = df["Risk_Category"].value_counts()
 
-fig,ax = plt.subplots()
-ax.bar(risk_counts.index,risk_counts.values)
-st.pyplot(fig)
+st.bar_chart(risk_counts)
 
 # High Risk Students Table
 st.subheader("🚨 High Risk Students")

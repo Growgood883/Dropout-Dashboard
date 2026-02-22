@@ -5,7 +5,7 @@ import pandas as pd
 st.title("🎓 Student Dropout Early Warning System")
 
 # Load Dataset
-df = pd.read_csv("student_risk_output.csv")
+df = pd.read_csv("student_risk_dashboard.csv")
 
 # Sidebar Filter
 st.sidebar.header("Filter Students")

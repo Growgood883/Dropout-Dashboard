@@ -7,7 +7,7 @@ st.set_page_config(
 )
 
 # LOAD DATA
-df = pd.read_csv("student_risk_dashboard(1).csv")
+df = pd.read_csv("student_risk_dashboard.csv")
 
 st.title("🎓 Gujarat School Dropout Decision Support System")
 st.markdown(

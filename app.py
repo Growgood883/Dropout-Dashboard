@@ -81,12 +81,12 @@ if menu=="🏠 State Overview":
     std = df.groupby('Standard')['Risk_Score'].mean().reset_index()
 
    fig3 = px.bar(
-    std,
-    x='Standard',
-    y='Risk_Score',
-    color='Risk_Score',
-    color_continuous_scale='RdYlGn_r'
-)
+        std,
+        x='Standard',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
 
     st.plotly_chart(fig3,use_container_width=True)
 

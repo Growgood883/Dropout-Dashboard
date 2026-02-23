@@ -1,26 +1,31 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 st.set_page_config(
-    page_title="Gujarat Student Dropout Decision Support System",
+    page_title="Gujarat Student Dropout DSS",
     layout="wide"
 )
 
-# LOAD DATA
-df = pd.read_csv("student_risk_dashboard.csv")
+# ---------------- LOAD DATA ---------------- #
+@st.cache_data
+def load_data():
+    return pd.read_csv("student_risk_dashboard.csv")
 
+df = load_data()
+
+# ---------------- TITLE ---------------- #
 st.title("🎓 Gujarat School Dropout Decision Support System")
-st.markdown(
-"""
-This dashboard helps education officers identify:
-- Which students are at high risk of dropping out
-- Where the risk is concentrated (District / School / Area)
-- Why the risk is occurring
-- What immediate intervention is required
-"""
-)
 
-# SIDEBAR NAVIGATION
+st.markdown("""
+This system helps education officers to:
+- Identify students at high risk of dropping out
+- Detect which district or school needs intervention
+- Understand WHY dropout risk is occurring
+- Take immediate action using Recommended Policy Support
+""")
+
+# ---------------- NAVIGATION ---------------- #
 menu = st.sidebar.radio(
     "Select Dashboard View",
     ["🏠 State Overview",
@@ -30,31 +35,60 @@ menu = st.sidebar.radio(
      "🚨 Intervention Required"]
 )
 
-# ---------------- STATE OVERVIEW ---------------- #
+# ---------------- OVERVIEW ---------------- #
 if menu=="🏠 State Overview":
 
-    st.header("State Level Situation")
+    st.header("📊 Gujarat State Situation")
 
-    col1,col2,col3 = st.columns(3)
+    c1,c2,c3 = st.columns(3)
 
-    col1.metric("Total Students",len(df))
-    col2.metric("High Risk Students",
-                len(df[df["Risk_Category"]=="High"]))
-    col3.metric("Immediate Intervention Required",
-                len(df[df["Priority_Level"]=="Immediate"]))
+    c1.metric("Total Students",len(df))
+    c2.metric("High Risk Students",
+              len(df[df["Risk_Category"]=="High"]))
+    c3.metric("Immediate Intervention",
+              len(df[df["Priority_Level"]=="Immediate"]))
 
-    st.progress(
-        len(df[df["Risk_Category"]=="High"])/len(df)
+    st.subheader("Dropout Risk by District")
+
+    dist = df.groupby('District')['Risk_Score'].mean().reset_index()
+
+    fig = px.bar(
+        dist,
+        x='District',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
     )
 
-    st.subheader("Districts with Highest Dropout Risk")
-    st.bar_chart(df.groupby('District')['Risk_Score'].mean())
+    st.plotly_chart(fig,use_container_width=True)
 
-    st.subheader("Risk by Area Type")
-    st.bar_chart(df.groupby('Area_Type')['Risk_Score'].mean())
+    st.subheader("Dropout Risk by Area Type")
+
+    area = df.groupby('Area_Type')['Risk_Score'].mean().reset_index()
+
+    fig2 = px.bar(
+        area,
+        x='Area_Type',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig2,use_container_width=True)
 
     st.subheader("Risk by Academic Standard")
-    st.bar_chart(df.groupby('Standard')['Risk_Score'].mean())
+
+    std = df.groupby('Standard')['Risk_Score'].mean().reset_index()
+
+    fig3 = px.line(
+        std,
+        x='Standard',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig3,use_container_width=True)
 
 # ---------------- DISTRICT ---------------- #
 elif menu=="📍 District Analysis":
@@ -68,12 +102,19 @@ elif menu=="📍 District Analysis":
 
     st.subheader(f"Dropout Risk in {district}")
 
-    st.bar_chart(ddf.groupby('School_ID')['Risk_Score'].mean())
-    st.bar_chart(ddf.groupby('Gender')['Risk_Score'].mean())
-    st.bar_chart(ddf.groupby('Caste_Category')['Risk_Score'].mean())
-    st.bar_chart(ddf.groupby('Standard')['Risk_Score'].mean())
+    sch = ddf.groupby('School_ID')['Risk_Score'].mean().reset_index()
 
-    st.subheader("Students Requiring Immediate Support")
+    fig4 = px.bar(
+        sch,
+        x='School_ID',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig4,use_container_width=True)
+
+    st.subheader("Students Needing Immediate Support")
 
     high = ddf[ddf["Priority_Level"]=="Immediate"]
 
@@ -93,12 +134,35 @@ elif menu=="🏫 School Analysis":
 
     sdf = df[df['School_ID']==school]
 
-    st.bar_chart(sdf.groupby('Area_Type')['Risk_Score'].mean())
-    st.bar_chart(sdf.groupby('Gender')['Risk_Score'].mean())
-    st.bar_chart(sdf.groupby('Caste_Category')['Risk_Score'].mean())
-    st.bar_chart(sdf.groupby('Standard')['Risk_Score'].mean())
+    st.subheader("Gender-wise Risk")
 
-    st.subheader("Students Needing Immediate Action")
+    gen = sdf.groupby('Gender')['Risk_Score'].mean().reset_index()
+
+    fig5 = px.bar(
+        gen,
+        x='Gender',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig5,use_container_width=True)
+
+    st.subheader("Caste-wise Risk")
+
+    caste = sdf.groupby('Caste_Category')['Risk_Score'].mean().reset_index()
+
+    fig6 = px.bar(
+        caste,
+        x='Caste_Category',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig6,use_container_width=True)
+
+    st.subheader("Students Requiring Immediate Action")
 
     high = sdf[sdf["Priority_Level"]=="Immediate"]
 
@@ -107,11 +171,32 @@ elif menu=="🏫 School Analysis":
      'Dropout_Reason','Recommended_Action']
     ])
 
-# ---------------- GENDER & CASTE ---------------- #
+# ---------------- SOCIAL ---------------- #
 elif menu=="👧 Gender & Social Group":
 
-    st.bar_chart(df.groupby('Gender')['Risk_Score'].mean())
-    st.bar_chart(df.groupby('Caste_Category')['Risk_Score'].mean())
+    g = df.groupby('Gender')['Risk_Score'].mean().reset_index()
+
+    fig7 = px.bar(
+        g,
+        x='Gender',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig7,use_container_width=True)
+
+    c = df.groupby('Caste_Category')['Risk_Score'].mean().reset_index()
+
+    fig8 = px.bar(
+        c,
+        x='Caste_Category',
+        y='Risk_Score',
+        color='Risk_Score',
+        color_continuous_scale='RdYlGn_r'
+    )
+
+    st.plotly_chart(fig8,use_container_width=True)
 
 # ---------------- POLICY ---------------- #
 elif menu=="🚨 Intervention Required":

@@ -80,13 +80,13 @@ if menu=="🏠 State Overview":
 
     std = df.groupby('Standard')['Risk_Score'].mean().reset_index()
 
-    fig3 = px.line(
-        std,
-        x='Standard',
-        y='Risk_Score',
-        color='Risk_Score',
-        color_continuous_scale='RdYlGn_r'
-    )
+   fig3 = px.bar(
+    std,
+    x='Standard',
+    y='Risk_Score',
+    color='Risk_Score',
+    color_continuous_scale='RdYlGn_r'
+)
 
     st.plotly_chart(fig3,use_container_width=True)
 
@@ -116,14 +116,19 @@ elif menu=="📍 District Analysis":
 
     st.subheader("Students Needing Immediate Support")
 
-    high = ddf[ddf["Priority_Level"]=="Immediate"]
+    support = ddf[
+        (ddf["Risk_Category"]=="High") |
+        (ddf["Risk_Category"]=="Medium")
+    ]
 
-    st.dataframe(high[
-    ['Student_ID','School_ID','Area_Type',
-     'Gender','Caste_Category','Standard',
-     'Dropout_Reason','Recommended_Action']
-    ])
-
+    st.dataframe(
+        support[
+            ['Student_ID','School_ID','Area_Type',
+            'Gender','Caste_Category','Standard',
+            'Risk_Category',
+            'Dropout_Reason','Recommended_Action']
+        ]
+    )
 # ---------------- SCHOOL ---------------- #
 elif menu=="🏫 School Analysis":
 
@@ -164,13 +169,18 @@ elif menu=="🏫 School Analysis":
 
     st.subheader("Students Requiring Immediate Action")
 
-    high = sdf[sdf["Priority_Level"]=="Immediate"]
+    support = sdf[
+        (sdf["Risk_Category"]=="High") |
+        (sdf["Risk_Category"]=="Medium")
+    ]
 
-    st.dataframe(high[
-    ['Student_ID','Gender','Standard',
-     'Dropout_Reason','Recommended_Action']
-    ])
-
+    st.dataframe(
+        support[
+            ['Student_ID','Gender','Standard',
+            'Risk_Category',
+            'Dropout_Reason','Recommended_Action']
+        ]
+    )
 # ---------------- SOCIAL ---------------- #
 elif menu=="👧 Gender & Social Group":
 
